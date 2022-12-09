@@ -1,6 +1,7 @@
 from tabulate import tabulate
 
 class WaterDFS:
+    
     visited =  []
     nodesTraversed = 0
     stack =  []
@@ -14,10 +15,12 @@ class WaterDFS:
     initD = 0
     
     class Node:
+        
         a = 0
         b = 0
         c = 0
         d = 0
+        
         def __init__(self, a, b, c, d):
             self.a = a
             self.b = b
@@ -28,6 +31,7 @@ class WaterDFS:
             return [self.a, self.b, self.c, self.d]
     
     class jug:
+        
         capacity = 0
         volume = 0
         
@@ -63,7 +67,9 @@ class WaterDFS:
     
     @staticmethod
     def addState(node):
+        
         formatted = node.toList()
+        
         if formatted not in WaterDFS.visited and node not in WaterDFS.stack:
             WaterDFS.stack.append(node)
         
@@ -137,8 +143,8 @@ class WaterDFS:
 
         return WaterDFS.nodesTraversed
     
-
 if __name__ == "__main__":
+    
     A = int(input("Specify A target: "))
     B = int(input("Specify B target: "))
     C = int(input("Specify C target: "))
