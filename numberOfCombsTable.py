@@ -2,25 +2,11 @@ from tabulate import tabulate
 
 class WaterDFS:
     
-    visited =  []
+    visited = []
     nodesTraversed = 0
-    stack =  []
-    jugA = None
-    jugB = None
-    jugC = None
-    jugD = None
-    initA = 0
-    initB = 0
-    initC = 0
-    initD = 0
-    
+    stack = []
+
     class Node:
-        
-        a = 0
-        b = 0
-        c = 0
-        d = 0
-        
         def __init__(self, a, b, c, d):
             self.a = a
             self.b = b
@@ -31,45 +17,26 @@ class WaterDFS:
             return [self.a, self.b, self.c, self.d]
     
     class jug:
-        
-        capacity = 0
-        volume = 0
-        
         def __init__(self, cap):
             self.capacity = cap
             self.volume = 0
         
-        def empty(self):
-            self.volume = 0
-            newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
-            WaterDFS.addState(newNode)
-        
-        def fill(self):
-            self.volume = self.capacity
+        def empty_or_fill(self, should_empty):
+            self.volume = 0 if should_empty else self.capacity
             newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
             WaterDFS.addState(newNode)
     
     @staticmethod
     def transfer(a, b):
-        
-        difference = b.capacity - b.volume
-        
-        if (a.volume >= difference):
-            b.volume = b.capacity
-            a.volume -= difference
-            newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
-            WaterDFS.addState(newNode)
-        else:
-            b.volume += a.volume
-            a.volume = 0
-            newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
-            WaterDFS.addState(newNode)
-    
+        transfer_amount = min(a.volume, b.capacity - b.volume)
+        a.volume -= transfer_amount
+        b.volume += transfer_amount
+        newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
+        WaterDFS.addState(newNode)
+
     @staticmethod
     def addState(node):
-        
         formatted = node.toList()
-        
         if formatted not in WaterDFS.visited and node not in WaterDFS.stack:
             WaterDFS.stack.append(node)
         
@@ -80,7 +47,7 @@ class WaterDFS:
         
     @staticmethod
     def main(args):
-
+    
         capA = args[0]
         capB = args[1]
         capC = args[2]
@@ -97,13 +64,12 @@ class WaterDFS:
         WaterDFS.jugC = WaterDFS.jug(capC)
         WaterDFS.jugD = WaterDFS.jug(capD)
         
-        while len(WaterDFS.stack) != 0:
+        while WaterDFS.stack:
             
             node = WaterDFS.stack.pop()
             formatted = node.toList()
             
             if formatted not in WaterDFS.visited:
-                #print(formatted)
                 WaterDFS.visited.append(formatted)
                 WaterDFS.nodesTraversed += 1
                 
@@ -116,33 +82,18 @@ class WaterDFS:
                 WaterDFS.initB = WaterDFS.jugB.volume
                 WaterDFS.initC = WaterDFS.jugC.volume
                 WaterDFS.initD = WaterDFS.jugD.volume
-                
-                WaterDFS.jugA.fill()
-                WaterDFS.jugB.fill()
-                WaterDFS.jugC.fill()
-                WaterDFS.jugD.fill()
-                
-                WaterDFS.jugA.empty()
-                WaterDFS.jugB.empty()
-                WaterDFS.jugC.empty()
-                WaterDFS.jugD.empty()
-
-                WaterDFS.transfer(WaterDFS.jugA, WaterDFS.jugB)
-                WaterDFS.transfer(WaterDFS.jugA, WaterDFS.jugC)
-                WaterDFS.transfer(WaterDFS.jugB, WaterDFS.jugA)
-                WaterDFS.transfer(WaterDFS.jugB, WaterDFS.jugC)
-                WaterDFS.transfer(WaterDFS.jugC, WaterDFS.jugA)
-                WaterDFS.transfer(WaterDFS.jugC, WaterDFS.jugB)
-                
-                WaterDFS.transfer(WaterDFS.jugA, WaterDFS.jugD)
-                WaterDFS.transfer(WaterDFS.jugC, WaterDFS.jugD)
-                WaterDFS.transfer(WaterDFS.jugB, WaterDFS.jugD)
-                WaterDFS.transfer(WaterDFS.jugD, WaterDFS.jugB)
-                WaterDFS.transfer(WaterDFS.jugD, WaterDFS.jugC)
-                WaterDFS.transfer(WaterDFS.jugD, WaterDFS.jugA)
+    
+                for jug in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
+                    jug.empty_or_fill(False)
+                    jug.empty_or_fill(True)
+    
+                for jug1 in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
+                    for jug2 in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
+                        if jug1 != jug2:
+                            WaterDFS.transfer(jug1, jug2)
 
         return WaterDFS.nodesTraversed
-    
+
 if __name__ == "__main__":
     
     A = int(input("Specify A target: "))
@@ -164,4 +115,4 @@ if __name__ == "__main__":
         colmbs.append(list(combs))
         combs.clear()
 
-    print(tabulate(colmbs, headers=Aval,tablefmt="fancy_grid", showindex="always"))
+    print(tabulate(colmbs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
