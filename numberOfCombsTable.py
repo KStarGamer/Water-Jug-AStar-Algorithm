@@ -1,23 +1,23 @@
 from tabulate import tabulate
 
 class WaterDFS:
-    
+
     visited, nodesTraversed, stack = [], 0, []
 
     class Node:
-        def __init__(self, a, b, c, d):
-            self.a, self.b, self.c, self.d = a, b, c, d
-            
+        def __init__(self, *volumes):
+            self.volumes = volumes
+
         def toList(self):
-            return [self.a, self.b, self.c, self.d]
+            return self.volumes
     
-    class jug:
+    class Jug:
         def __init__(self, cap):
             self.capacity, self.volume = cap, 0
         
         def empty_or_fill(self, should_empty):
             self.volume = 0 if should_empty else self.capacity
-            newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
+            newNode = WaterDFS.Node(*[j.volume for j in WaterDFS.jugs])
             WaterDFS.addState(newNode)
     
     @staticmethod
@@ -25,65 +25,69 @@ class WaterDFS:
         transfer_amount = min(a.volume, b.capacity - b.volume)
         a.volume -= transfer_amount
         b.volume += transfer_amount
-        newNode = WaterDFS.Node(WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume)
+        newNode = WaterDFS.Node(*[j.volume for j in WaterDFS.jugs])
         WaterDFS.addState(newNode)
 
     @staticmethod
     def addState(node):
-        formatted = [node.a, node.b, node.c, node.d]
+        formatted = node.toList()
         if formatted not in WaterDFS.visited and node not in WaterDFS.stack:
             WaterDFS.stack.append(node)
         
-        WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume = WaterDFS.initA, WaterDFS.initB, WaterDFS.initC, WaterDFS.initD
+        for jug, initial_volume in zip(WaterDFS.jugs, WaterDFS.initial_volumes):
+            jug.volume = initial_volume
       
     @staticmethod
     def main(args):
-        capA, capB, capC, capD = args
         WaterDFS.visited.clear()
         WaterDFS.nodesTraversed = 0
-    
-        n = WaterDFS.Node(0, 0, 0, 0)
+
+        WaterDFS.jugs = [WaterDFS.Jug(cap) for cap in args]
+        WaterDFS.initial_volumes = [0 for _ in args]
+        
+        n = WaterDFS.Node(*WaterDFS.initial_volumes)
         WaterDFS.stack.append(n)
-        WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD = (WaterDFS.jug(cap) for cap in args)
-    
+
         while WaterDFS.stack:
             node = WaterDFS.stack.pop()
             if node.toList() not in WaterDFS.visited:
                 WaterDFS.visited.append(node.toList())
                 WaterDFS.nodesTraversed += 1
-                WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume = node.a, node.b, node.c, node.d
-                WaterDFS.initA, WaterDFS.initB, WaterDFS.initC, WaterDFS.initD = WaterDFS.jugA.volume, WaterDFS.jugB.volume, WaterDFS.jugC.volume, WaterDFS.jugD.volume
+                for jug, volume in zip(WaterDFS.jugs, node.volumes):
+                    jug.volume = volume
+                WaterDFS.initial_volumes = [j.volume for j in WaterDFS.jugs]
 
-                for jug in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
+                for jug in WaterDFS.jugs:
                     jug.empty_or_fill(False)
                     jug.empty_or_fill(True)
     
-                for jug1 in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
-                    for jug2 in (WaterDFS.jugA, WaterDFS.jugB, WaterDFS.jugC, WaterDFS.jugD):
+                for jug1 in WaterDFS.jugs:
+                    for jug2 in WaterDFS.jugs:
                         if jug1 != jug2:
                             WaterDFS.transfer(jug1, jug2)
 
         return WaterDFS.nodesTraversed
 
 if __name__ == "__main__":
-    
-    A = int(input("Specify A volume: "))
-    B = int(input("Specify B volume: "))
-    C = int(input("Specify C volume: "))
-    D = int(input("Specify D volume: "))
 
-    Aval = [i for i in range(A+1)]
-    Bval = [i for i in range(B+1)]
+    capacities = []
+    while True:
+        cap = int(input("Enter the capacity of a jug (0 to stop): "))
+        if cap == 0:
+            break
+        capacities.append(cap)
 
-    #print(WaterDFS.main([A,B,C,D]))
+    Aval = [i for i in range(capacities[0]+1)]
+    Bval = [i for i in range(capacities[1]+1)]
 
-    combs = []
-    colmbs = []
-    
+    combs, truecombs = [], []
+
     for i in Bval:
         for j in Aval:
-            combs.append(WaterDFS.main([i,j,C,D]))
-        colmbs.append(list(combs))
+            capacities[0] = j
+            capacities[1] = i
+            combs.append(WaterDFS.main(capacities))
+        truecombs.append(list(combs))
         combs.clear()
 
-    print(tabulate(colmbs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
+    print(tabulate(truecombs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
