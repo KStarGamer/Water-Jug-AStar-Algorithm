@@ -27,8 +27,7 @@ class WaterDFS:
 
     @staticmethod
     def addState(node):
-        formatted = tuple(node.volumes)
-        if formatted not in WaterDFS.visited and node not in WaterDFS.stack:
+        if tuple(node.volumes) not in WaterDFS.visited and node not in WaterDFS.stack:
             WaterDFS.stack.add(node)
         
         for jug, initial_volume in zip(WaterDFS.jugs, WaterDFS.initial_volumes):
@@ -40,7 +39,7 @@ class WaterDFS:
         WaterDFS.nodesTraversed = 0
 
         WaterDFS.jugs = [WaterDFS.Jug(cap) for cap in args]
-        WaterDFS.initial_volumes = [0 for _ in args]
+        WaterDFS.initial_volumes = (0 for _ in args)
         
         n = WaterDFS.Node(*WaterDFS.initial_volumes)
         WaterDFS.stack.add(n)
