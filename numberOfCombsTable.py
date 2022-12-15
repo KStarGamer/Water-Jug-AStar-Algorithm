@@ -2,11 +2,7 @@ from tabulate import tabulate
 
 class WaterDFS:
 
-    visited, nodesTraversed, stack = [], 0, set()
-
-    class Node:
-        def __init__(self, *volumes):
-            self.volumes = volumes
+    visited, nodesTraversed, stack = set(), 0, set()
 
     class Jug:
         def __init__(self, cap):
@@ -14,21 +10,20 @@ class WaterDFS:
         
         def empty_or_fill(self, should_empty):
             self.volume = 0 if should_empty else self.capacity
-            newNode = WaterDFS.Node(*[j.volume for j in WaterDFS.jugs])
-            WaterDFS.addState(newNode)
+            WaterDFS.addState(WaterDFS.jugs)
     
     @staticmethod
     def transfer(a, b):
         transfer_amount = min(a.volume, b.capacity - b.volume)
         a.volume -= transfer_amount
         b.volume += transfer_amount
-        newNode = WaterDFS.Node(*[j.volume for j in WaterDFS.jugs])
-        WaterDFS.addState(newNode)
+        WaterDFS.addState(WaterDFS.jugs)
 
     @staticmethod
-    def addState(node):
-        if tuple(node.volumes) not in WaterDFS.visited and node not in WaterDFS.stack:
-            WaterDFS.stack.add(node)
+    def addState(jugs):
+        volumes = tuple(j.volume for j in jugs)
+        if volumes not in WaterDFS.visited and volumes not in WaterDFS.stack:
+            WaterDFS.stack.add(volumes)
         
         for jug, initial_volume in zip(WaterDFS.jugs, WaterDFS.initial_volumes):
             jug.volume = initial_volume
@@ -41,15 +36,15 @@ class WaterDFS:
         WaterDFS.jugs = [WaterDFS.Jug(cap) for cap in args]
         WaterDFS.initial_volumes = (0 for _ in args)
         
-        n = WaterDFS.Node(*WaterDFS.initial_volumes)
-        WaterDFS.stack.add(n)
+        volumes = tuple(WaterDFS.initial_volumes)
+        WaterDFS.stack.add(volumes)
 
         while WaterDFS.stack:
-            node = WaterDFS.stack.pop()
-            if node.volumes not in WaterDFS.visited:
-                WaterDFS.visited.append(node.volumes)
+            volumes = WaterDFS.stack.pop()
+            if volumes not in WaterDFS.visited:
+                WaterDFS.visited.add(volumes)
                 WaterDFS.nodesTraversed += 1
-                for jug, volume in zip(WaterDFS.jugs, node.volumes):
+                for jug, volume in zip(WaterDFS.jugs, volumes):
                     jug.volume = volume
                 WaterDFS.initial_volumes = [j.volume for j in WaterDFS.jugs]
 
