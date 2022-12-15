@@ -1,4 +1,4 @@
-# Water-Jug-DFS-Algorithm
+# Water-Jug-A*-Algorithm
 A Python script to generate a table, using the tabulate package, of the number of possible states of a jug puzzle determined by the three actions:
 
 1) A jug is filled completely.
