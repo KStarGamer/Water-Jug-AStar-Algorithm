@@ -1,8 +1,10 @@
 from tabulate import tabulate
+from collections import deque
+from heapq import heappush, heappop
 
-class WaterDFS:
+class WaterAStar:
 
-    visited, nodesTraversed, stack = set(), 0, set()
+    visited, nodesTraversed = set(), 0
 
     class Jug:
         def __init__(self, cap):
@@ -10,54 +12,55 @@ class WaterDFS:
         
         def empty_or_fill(self, should_empty):
             self.volume = 0 if should_empty else self.capacity
-            WaterDFS.addState(WaterDFS.jugs)
+            WaterAStar.addState(WaterAStar.jugs, 0)
     
     @staticmethod
     def transfer(a, b):
         transfer_amount = min(a.volume, b.capacity - b.volume)
         a.volume -= transfer_amount
         b.volume += transfer_amount
-        WaterDFS.addState(WaterDFS.jugs)
+        WaterAStar.addState(WaterAStar.jugs, 0)
 
     @staticmethod
-    def addState(jugs):
+    def addState(jugs, cost):
         volumes = tuple(j.volume for j in jugs)
-        if volumes not in WaterDFS.visited and volumes not in WaterDFS.stack:
-            WaterDFS.stack.add(volumes)
+        if volumes not in WaterAStar.visited:
+            heappush(WaterAStar.queue, (cost + sum(volumes), volumes))
         
-        for jug, initial_volume in zip(WaterDFS.jugs, WaterDFS.initial_volumes):
+        for jug, initial_volume in zip(WaterAStar.jugs, WaterAStar.initial_volumes):
             jug.volume = initial_volume
       
     @staticmethod
     def main(args):
-        WaterDFS.visited.clear()
-        WaterDFS.nodesTraversed = 0
+        WaterAStar.visited.clear()
+        WaterAStar.nodesTraversed = 0
+        WaterAStar.queue = []
 
-        WaterDFS.jugs = [WaterDFS.Jug(cap) for cap in args]
-        WaterDFS.initial_volumes = (0 for _ in args)
+        WaterAStar.jugs = [WaterAStar.Jug(cap) for cap in args]
+        WaterAStar.initial_volumes = (0 for _ in args)
         
-        volumes = tuple(WaterDFS.initial_volumes)
-        WaterDFS.stack.add(volumes)
+        volumes = tuple(WaterAStar.initial_volumes)
+        heappush(WaterAStar.queue, (0, volumes))
 
-        while WaterDFS.stack:
-            volumes = WaterDFS.stack.pop()
-            if volumes not in WaterDFS.visited:
-                WaterDFS.visited.add(volumes)
-                WaterDFS.nodesTraversed += 1
-                for jug, volume in zip(WaterDFS.jugs, volumes):
+        while WaterAStar.queue:
+            _, volumes = heappop(WaterAStar.queue)
+            if volumes not in WaterAStar.visited:
+                WaterAStar.visited.add(volumes)
+                WaterAStar.nodesTraversed += 1
+                for jug, volume in zip(WaterAStar.jugs, volumes):
                     jug.volume = volume
-                WaterDFS.initial_volumes = [j.volume for j in WaterDFS.jugs]
+                WaterAStar.initial_volumes = [j.volume for j in WaterAStar.jugs]
 
-                for jug in WaterDFS.jugs:
+                for jug in WaterAStar.jugs:
                     jug.empty_or_fill(False)
                     jug.empty_or_fill(True)
     
-                for jug1 in WaterDFS.jugs:
-                    for jug2 in WaterDFS.jugs:
+                for jug1 in WaterAStar.jugs:
+                    for jug2 in WaterAStar.jugs:
                         if jug1 != jug2:
-                            WaterDFS.transfer(jug1, jug2) 
+                            WaterAStar.transfer(jug1, jug2) 
                           
-        return WaterDFS.nodesTraversed
+        return WaterAStar.nodesTraversed
 
 if __name__ == "__main__":
 
@@ -76,7 +79,7 @@ if __name__ == "__main__":
     for i in Bval:
         for j in Aval:
             capacities[0], capacities[1] = j, i
-            combs.append(WaterDFS.main(capacities))
+            combs.append(WaterAStar.main(capacities))
         truecombs.append(list(combs))
         combs.clear()
 
