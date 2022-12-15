@@ -2,15 +2,12 @@ from tabulate import tabulate
 
 class WaterDFS:
 
-    visited, nodesTraversed, stack = [], 0, []
+    visited, nodesTraversed, stack = [], 0, set()
 
     class Node:
         def __init__(self, *volumes):
             self.volumes = volumes
 
-        def toList(self):
-            return self.volumes
-    
     class Jug:
         def __init__(self, cap):
             self.capacity, self.volume = cap, 0
@@ -30,9 +27,9 @@ class WaterDFS:
 
     @staticmethod
     def addState(node):
-        formatted = node.toList()
+        formatted = tuple(node.volumes)
         if formatted not in WaterDFS.visited and node not in WaterDFS.stack:
-            WaterDFS.stack.append(node)
+            WaterDFS.stack.add(node)
         
         for jug, initial_volume in zip(WaterDFS.jugs, WaterDFS.initial_volumes):
             jug.volume = initial_volume
@@ -46,12 +43,12 @@ class WaterDFS:
         WaterDFS.initial_volumes = [0 for _ in args]
         
         n = WaterDFS.Node(*WaterDFS.initial_volumes)
-        WaterDFS.stack.append(n)
+        WaterDFS.stack.add(n)
 
         while WaterDFS.stack:
             node = WaterDFS.stack.pop()
-            if node.toList() not in WaterDFS.visited:
-                WaterDFS.visited.append(node.toList())
+            if node.volumes not in WaterDFS.visited:
+                WaterDFS.visited.append(node.volumes)
                 WaterDFS.nodesTraversed += 1
                 for jug, volume in zip(WaterDFS.jugs, node.volumes):
                     jug.volume = volume
@@ -64,8 +61,8 @@ class WaterDFS:
                 for jug1 in WaterDFS.jugs:
                     for jug2 in WaterDFS.jugs:
                         if jug1 != jug2:
-                            WaterDFS.transfer(jug1, jug2)
-
+                            WaterDFS.transfer(jug1, jug2) 
+                          
         return WaterDFS.nodesTraversed
 
 if __name__ == "__main__":
@@ -84,8 +81,7 @@ if __name__ == "__main__":
 
     for i in Bval:
         for j in Aval:
-            capacities[0] = j
-            capacities[1] = i
+            capacities[0], capacities[1] = j, i
             combs.append(WaterDFS.main(capacities))
         truecombs.append(list(combs))
         combs.clear()
