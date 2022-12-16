@@ -1,5 +1,4 @@
 from tabulate import tabulate
-from collections import deque
 from heapq import heappush, heappop
 
 class WaterAStar:
