@@ -73,13 +73,13 @@ if __name__ == "__main__":
     Aval = [i for i in range(capacities[0]+1)]
     Bval = [i for i in range(capacities[1]+1)]
 
-    combs, truecombs = [], []
+    combs = []
 
     for i in Bval:
+        tempcombs = []
         for j in Aval:
             capacities[0], capacities[1] = j, i
-            combs.append(WaterAStar.main(capacities))
-        truecombs.append(list(combs))
-        combs.clear()
+            tempcombs.append(WaterAStar.main(capacities))
+        combs.append(tempcombs)
 
-    print(tabulate(truecombs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
+    print(tabulate(combs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
