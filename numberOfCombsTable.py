@@ -64,6 +64,7 @@ class WaterAStar:
 if __name__ == "__main__":
 
     capacities = []
+  
     while True:
         cap = int(input("Enter the capacity of a jug (0 to stop): "))
         if cap == 0:
@@ -73,13 +74,4 @@ if __name__ == "__main__":
     Aval = [i for i in range(capacities[0]+1)]
     Bval = [i for i in range(capacities[1]+1)]
 
-    combs = []
-
-    for i in Bval:
-        tempcombs = []
-        for j in Aval:
-            capacities[0], capacities[1] = j, i
-            tempcombs.append(WaterAStar.main(capacities))
-        combs.append(tempcombs)
-
-    print(tabulate(combs, headers=Aval, tablefmt="fancy_grid", showindex="always"))
+    print(tabulate([[WaterAStar.main([a, b] + capacities[2:]) for a in Aval] for b in Bval], headers=Aval, tablefmt="fancy_grid", showindex="always"))
